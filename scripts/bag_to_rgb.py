@@ -20,11 +20,11 @@ class getCustomArgs():
     def __init__(self):
         import rospkg
         rospack = rospkg.RosPack()  # get an instance of RosPack with the default search paths
-        self.path = rospack.get_path('dualcamera_sync')   # get the file path for dualcamera_sync
+        self.path = rospack.get_path('dualcamera_sync')   # get the package location where the bagfiles are. In my case it is within a package named dualcamera_sync.
         self.bag_folder_path = f"{self.path}/bags"
         self.bag_filenames = []
         self.output_dir = ''
-        self.image_topics = ['/camera/color/image_raw','/kinect2/hd/image_color']
+        self.image_topics = ['/camera/color/image_raw','/kinect2/hd/image_color']   # MOdify these topic names as per your usecase.
         self.getfilenames()
         self.setOutputDir()
         
@@ -36,12 +36,12 @@ class getCustomArgs():
         ]
         
     def setOutputDir(self):
-        self.output_dir = f'{self.path}/extracted_bags'
+        self.output_dir = f'{self.path}/extracted_bags' # Modify this as needed.
     
 def extractAndSave(bagfile, foldername, args):
     
     bag_folder = args.bag_folder_path
-    print(f"Extract images from {bag_folder}/{bagfile} on topic(s) {args.image_topics} into {args.output_dir}/{foldername}")
+    print(f"Extracting images from {bag_folder}/{bagfile} on topic(s) {args.image_topics} into {args.output_dir}/{foldername}")
     bag = rosbag.Bag(f'{bag_folder}/{bagfile}', "r")
     cvb = CvBridge()
     for count, (topic, msg, t) in enumerate(bag.read_messages(topics=args.image_topics)):
@@ -55,10 +55,10 @@ def extractAndSave(bagfile, foldername, args):
             image_normal = np.array(cv_image)
             image_normal = cv2.cvtColor(image_normal, cv2.COLOR_BGR2RGB)
             
-            if topic == '/camera/color/image_raw':
-                folder_path = f'{args.output_dir}/{foldername}/agent_0/'
-            elif topic == '/kinect2/hd/image_color':
-                folder_path = f'{args.output_dir}/{foldername}/agent_1/'
+            if topic == '/camera/color/image_raw':      # Modify if needed
+                folder_path = f'{args.output_dir}/{foldername}/agent_0/'    # Modify if needed
+            elif topic == '/kinect2/hd/image_color':    # Modify if needed
+                folder_path = f'{args.output_dir}/{foldername}/agent_1/'    # Modify if needed
             else:
                 folder_path = f'{args.output_dir}/{foldername}/other/'
                 
@@ -96,7 +96,9 @@ def main():
     rospy.loginfo("Running Bag to RGB extractor")
     # while not rospy.is_shutdown():
     j = 1
+    foldername = 'myfolder'
     for i, bag in enumerate(sorted(args.bag_filenames)):
+        # You typically wouldn't need the following lines until the function call extractAndSave(). You can safely comment it out.
         if bag in ['20230806-174810.bag', '20230806-175039.bag', '20230806-174701.bag', '20230806-174538.bag', '20230806-174921.bag']:
             if i > 4:
                 foldername = f'fatigued_{j}'
